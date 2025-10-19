@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Real-time news aggregation with customizable categories and sources">
+    <title>NewsStream - Real-Time News Aggregation</title>
+    
+    <!-- Performance and Security (Remove X-Frame-Options meta tag) -->
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-XSS-Protection" content="1; mode=block">
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Progress Bar -->
+    <div id="progressBar" class="progress-bar" role="progressbar" aria-hidden="true"></div>
+    
+    <!-- Header -->
+    <header class="header" role="banner">
+        <div class="header__container">
+            <div class="header__brand">
+                <svg class="icon__heroicon brand-icon" width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/>
+                </svg>
+                <h1 class="header__title">NewsStream</h1>
+                <span class="live-badge">LIVE</span>
+            </div>
+            
+            <div class="header__controls">
+                <div class="status-info">
+                    <span id="loadingStatus" class="status-text">Ready</span>
+                    <span id="articleCount" class="article-count" aria-live="polite"></span>
+                </div>
+                
+                <button id="refreshBtn" class="btn btn--icon" aria-label="Refresh news" title="Refresh news">
+                    <svg id="refreshIcon" class="icon__heroicon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                    </svg>
+                </button>
+                
+                <button id="settingsBtn" class="btn btn--icon" aria-label="Open settings" title="Settings">
+                    <svg class="icon__heroicon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Category Navigation -->
+    <nav class="category-nav" role="navigation" aria-label="News categories">
+        <div class="category-nav__container">
+            <button class="category-tab category-tab--active" data-category="all" aria-pressed="true">
+                <svg class="icon__heroicon" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                </svg>
+                <span>All News</span>
+            </button>
+            <!-- Dynamic category buttons will be inserted here -->
+        </div>
+    </nav>
+    
+    <!-- Main Content -->
+    <main class="main-content" role="main">
+        <!-- Source Info -->
+        <div class="source-info">
+            <p id="activeSourcesInfo">Personalized news from your selected sources</p>
+        </div>
+        
+        <!-- News Grid -->
+        <div id="newsGrid" class="news-grid" role="region" aria-label="News articles">
+            <!-- Progressive news cards will be inserted here -->
+        </div>
+        
+        <!-- Hidden states (kept for background functionality) -->
+        <div id="loadingState" class="loading-state" style="display: none;" aria-hidden="true"></div>
+        <div id="errorState" class="error-state" style="display: none;" aria-hidden="true"></div>
+        <div id="noResults" class="no-results" style="display: none;" aria-hidden="true"></div>
+    </main>
+    
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal-overlay" role="dialog" aria-labelledby="settingsTitle" aria-hidden="true">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h2 id="settingsTitle" class="modal-title">Customize Your News</h2>
+                <button id="closeSettings" class="btn btn--icon" aria-label="Close settings">
+                    <svg class="icon__heroicon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="modal-content">
+                <!-- Categories Section -->
+                <section class="settings-section">
+                    <div class="section-header">
+                        <h3 class="section-title">
+                            <svg class="icon__heroicon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.99 1.99 0 013 12V7a4 4 0 014-4z"/>
+                            </svg>
+                            Categories
+                        </h3>
+                        <span class="section-limit">Select 1-15 categories</span>
+                    </div>
+                    
+                    <div id="categoryGrid" class="category-grid">
+                        <!-- Category checkboxes will be populated here -->
+                    </div>
+                    
+                    <div class="custom-section">
+                        <h4 class="custom-title">Add Custom Category</h4>
+                        <div class="custom-form">
+                            <input type="text" id="customCategoryInput" class="input-field" placeholder="Category name (e.g., Climate Change)" maxlength="50">
+                            <button id="addCategoryBtn" class="btn btn--secondary">Add</button>
+                        </div>
+                        <div id="customCategoriesList" class="custom-list"></div>
+                    </div>
+                </section>
+                
+                <!-- Sources Section -->
+                <section class="settings-section">
+                    <div class="section-header">
+                        <h3 class="section-title">
+                            <svg class="icon__heroicon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/>
+                            </svg>
+                            News Sources
+                        </h3>
+                        <span class="section-limit">Select up to 5 per category</span>
+                    </div>
+                    
+                    <div id="sourcesGrid" class="sources-grid">
+                        <!-- Source checkboxes will be populated here -->
+                    </div>
+                    
+                    <div class="custom-section">
+                        <h4 class="custom-title">Add Custom RSS Source</h4>
+                        <div class="custom-form custom-form--vertical">
+                            <input type="text" id="customSourceName" class="input-field" placeholder="Source name (e.g., Local Times)" maxlength="50">
+                            <input type="url" id="customSourceURL" class="input-field" placeholder="RSS feed URL (https://)" required>
+                            <select id="customSourceCategory" class="input-field">
+                                <option value="">Select category</option>
+                            </select>
+                            <button id="addSourceBtn" class="btn btn--secondary">Add RSS Source</button>
+                        </div>
+                        <div id="customSourcesList" class="custom-list"></div>
+                    </div>
+                </section>
+            </div>
+            
+            <div class="modal-footer">
+                <div class="selection-summary">
+                    <span><strong>Categories:</strong> <span id="selectedCategoriesCount">0</span>/15</span>
+                    <span><strong>Sources:</strong> <span id="selectedSourcesCount">0</span> total</span>
+                </div>
+                
+                <div class="modal-actions">
+                    <button id="resetSettings" class="btn btn--outline">Reset to Default</button>
+                    <button id="cancelSettings" class="btn btn--outline">Cancel</button>
+                    <button id="saveSettings" class="btn btn--primary">Save & Apply</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
